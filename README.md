@@ -13,6 +13,9 @@ It costs nothing when no app is using the camera. The effects only run while an 
 
 <img width="589" height="441" alt="image" src="https://github.com/user-attachments/assets/d0b131d8-9a52-43bf-962a-ab052e77d68c" />
 
+> [!WARNING]
+> This project was built with AI. Expect rough edges, and review the code before relying on it.
+
 ## Requirements
 
 | | |
