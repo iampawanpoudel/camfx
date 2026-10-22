@@ -1,0 +1,7 @@
+build/
+third_party/
+*.user
+.vs/
+build-*/
+dist/
+local.md
