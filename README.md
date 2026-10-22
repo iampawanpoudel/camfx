@@ -11,6 +11,8 @@ Lightweight camera effects for Windows 11, similar to the macOS video effects. C
 
 It costs nothing when no app is using the camera. The effects only run while an app has CamFX Camera open, and then they use a few percent of one CPU core.
 
+<img width="589" height="441" alt="image" src="https://github.com/user-attachments/assets/d0b131d8-9a52-43bf-962a-ab052e77d68c" />
+
 ## Requirements
 
 | | |
