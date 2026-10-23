@@ -128,6 +128,30 @@ static void TestBackground()
     }
 }
 
+static void TestLowLightWithImageBackground()
+{
+    const int W = 64, H = 32;
+    std::vector<uint8_t> red((size_t)8 * 8 * 4);
+    for (size_t i = 0; i < red.size(); i += 4) { red[i] = 0; red[i + 1] = 0; red[i + 2] = 255; red[i + 3] = 255; }
+
+    FxSettings s; s.background = BgImage; s.lowLight = true;
+    Effects fx;
+    fx.SetSettings(s);
+    fx.SetBackgroundImage(red, 8, 8);
+    // Left half person, right half background image.
+    fx.SetSegmenter([](const float*, float* m) {
+        for (int y = 0; y < Effects::kMaskH; y++)
+            for (int x = 0; x < Effects::kMaskW; x++)
+                m[y * Effects::kMaskW + x] = x < Effects::kMaskW / 2 ? 1.f : 0.f;
+        return true;
+    });
+    Frame f(W, H, 200, 128, 128);
+    f.Run(fx);
+    CHECK(f.y[(H / 2) * W + W / 4] == 255);                       // person is boosted
+    CHECK(std::abs(f.y[(H / 2) * W + 3 * W / 4] - 82) <= 2);      // image background is untouched
+    CHECK(std::abs(f.uv[(H / 4) * W + 3 * W / 4 + 1] - 240) <= 2);
+}
+
 // argv[1]: folder with onnxruntime.dll and person_segmenter.onnx
 static void TestSegmenter(const wchar_t* dir)
 {
@@ -183,6 +207,7 @@ int wmain(int argc, wchar_t** argv)
     TestPassthrough();
     TestMirrorAndZoom();
     TestBackground();
+    TestLowLightWithImageBackground();
     if (argc > 1) TestSegmenter(argv[1]);
     else std::printf("skipping segmenter test (no model dir)\n");
     std::printf(g_fail ? "%d check(s) failed\n" : "all effects tests passed\n", g_fail);

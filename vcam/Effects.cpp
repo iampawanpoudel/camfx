@@ -104,6 +104,33 @@ void Effects::SetSettings(const FxSettings& s)
     {
         if (m_lutY[i] != i || m_lutU[i] != i || m_lutV[i] != i) { m_lutIdentity = false; break; }
     }
+
+    // Low light is split out of the main LUT when an image background is used: the person gets
+    // it before compositing, so the replacement image keeps its own exposure.
+    FxSettings noLl = m_s;
+    noLl.lowLight = false;
+    BuildLuts(noLl, m_lutYNoLl, m_lutUNoLl, m_lutVNoLl);
+    m_lutNoLlIdentity = true;
+    for (int i = 0; i < 256; i++)
+    {
+        if (m_lutYNoLl[i] != i || m_lutUNoLl[i] != i || m_lutVNoLl[i] != i) { m_lutNoLlIdentity = false; break; }
+    }
+
+    FxSettings boost;
+    boost.lowLight = true;
+    uint8_t boostU[256], boostV[256];
+    BuildLuts(boost, m_lutBoostY, boostU, boostV);
+}
+
+void Effects::BoostForeground(uint8_t* y, int yPitch, int w, int h)
+{
+    for (int yy = 0; yy < h; yy++)
+    {
+        uint8_t* p = y + (size_t)yy * yPitch;
+        const uint8_t* ar = &m_alpha[(size_t)yy * m_w];
+        for (int x = 0; x < w; x++)
+            if (ar[x]) p[x] = m_lutBoostY[p[x]];
+    }
 }
 
 void Effects::SetBackgroundImage(std::vector<uint8_t> bgra, int w, int h)
@@ -425,7 +452,17 @@ void Effects::Process(uint8_t* y, int yPitch, uint8_t* uv, int uvPitch, int w, i
         BuildAlpha(y, yPitch);
         haveAlpha = true;
     }
+
+    // With a replacement image, low light belongs to the person, not to the image: boost the
+    // foreground before compositing and keep low light out of the frame-wide LUT below.
+    bool boostForeground = m_s.lowLight && m_s.background == BgImage && haveAlpha;
+    if (boostForeground) BoostForeground(y, yPitch, w, h);
     if (haveAlpha && m_s.background != BgOff) Composite(y, yPitch, uv, uvPitch);
+
+    const uint8_t* lutY = boostForeground ? m_lutYNoLl : m_lutY;
+    const uint8_t* lutU = boostForeground ? m_lutUNoLl : m_lutU;
+    const uint8_t* lutV = boostForeground ? m_lutVNoLl : m_lutV;
+    const bool lutIdentity = boostForeground ? m_lutNoLlIdentity : m_lutIdentity;
 
     FxRect r = ZoomRect(w, h, m_s.zoom, m_s.panX, m_s.panY);
     if (m_s.autoFrame)
@@ -437,16 +474,16 @@ void Effects::Process(uint8_t* y, int yPitch, uint8_t* uv, int uvPitch, int w, i
     bool resample = m_s.mirror || r.w < w - 0.5f || r.h < h - 0.5f;
     if (!resample)
     {
-        if (m_lutIdentity) return;
+        if (lutIdentity) return;
         for (int yy = 0; yy < h; yy++)
         {
             uint8_t* p = y + (size_t)yy * yPitch;
-            for (int x = 0; x < w; x++) p[x] = m_lutY[p[x]];
+            for (int x = 0; x < w; x++) p[x] = lutY[p[x]];
         }
         for (int yy = 0; yy < h / 2; yy++)
         {
             uint8_t* p = uv + (size_t)yy * uvPitch;
-            for (int x = 0; x < (w & ~1); x += 2) { p[x] = m_lutU[p[x]]; p[x + 1] = m_lutV[p[x + 1]]; }
+            for (int x = 0; x < (w & ~1); x += 2) { p[x] = lutU[p[x]]; p[x + 1] = lutV[p[x + 1]]; }
         }
         return;
     }
@@ -485,7 +522,7 @@ void Effects::Process(uint8_t* y, int yPitch, uint8_t* uv, int uvPitch, int w, i
             int x0 = m_rx[j], fx = m_rf[j];
             int top = a[x0] * (256 - fx) + a[x0 + 1] * fx;
             int bot = b[x0] * (256 - fx) + b[x0 + 1] * fx;
-            out[j] = m_lutY[(top * (256 - fy) + bot * fy + 32768) >> 16];
+            out[j] = lutY[(top * (256 - fy) + bot * fy + 32768) >> 16];
         }
     }
 
@@ -505,7 +542,7 @@ void Effects::Process(uint8_t* y, int yPitch, uint8_t* uv, int uvPitch, int w, i
                 int top = a[x0 + c] * (256 - fx) + a[x0 + 2 + c] * fx;
                 int bot = b[x0 + c] * (256 - fx) + b[x0 + 2 + c] * fx;
                 int v = (top * (256 - fy) + bot * fy + 32768) >> 16;
-                out[j * 2 + c] = c ? m_lutV[v] : m_lutU[v];
+                out[j * 2 + c] = c ? lutV[v] : lutU[v];
             }
         }
     }

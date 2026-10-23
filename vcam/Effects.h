@@ -46,6 +46,7 @@ private:
     bool UpdateMask(const uint8_t* y, int yPitch, const uint8_t* uv, int uvPitch);
     void BuildAlpha(const uint8_t* y, int yPitch);
     void Composite(uint8_t* y, int yPitch, uint8_t* uv, int uvPitch);
+    void BoostForeground(uint8_t* y, int yPitch, int w, int h);
     void UpdateAutoFrame();
     void FitBackgroundImage();
 
@@ -53,6 +54,9 @@ private:
     SegmentFn m_segment;
     uint8_t m_lutY[256], m_lutU[256], m_lutV[256];
     bool m_lutIdentity = true;
+    uint8_t m_lutYNoLl[256], m_lutUNoLl[256], m_lutVNoLl[256]; // adjustments without low light
+    bool m_lutNoLlIdentity = true;
+    uint8_t m_lutBoostY[256];                                  // low light only, applied to the person
 
     int m_w = 0, m_h = 0, m_lw = 0, m_lh = 0;  // frame and quarter-res sizes
     unsigned m_frame = 0;
