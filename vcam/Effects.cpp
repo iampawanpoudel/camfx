@@ -47,6 +47,40 @@ namespace
     }
 
     inline float Lerp(float a, float b, float t) { return a + (b - a) * t; }
+
+    // The one-tap looks, in FxFilter order starting at Filter_1977. Values follow their CSS chains:
+    // brightness/contrast/saturate scale directly, sepia and grayscale desaturate and tint, and hue is
+    // in degrees. Perpetua is empty in the source list, so it stays an identity preset.
+    struct Preset { float brightness, contrast, saturate, sepia, grayscale, hue, du, dv; };
+    const Preset kPresets[] =
+    {
+        { 1.10f, 1.10f, 1.10f, 0.00f, 0.f,   0.f,   0.f,   0.f }, // 1977
+        { 1.20f, 0.90f, 0.85f, 0.00f, 0.f, -20.f,   0.f,   0.f }, // Aden
+        { 1.10f, 0.90f, 1.50f, 0.00f, 0.f, -10.f,   0.f,   0.f }, // Amaro
+        { 1.00f, 1.40f, 1.00f, 0.50f, 0.f,   0.f,   0.f,   0.f }, // Brannan
+        { 1.00f, 1.20f, 1.35f, 0.00f, 0.f,   0.f,   0.f,   0.f }, // Clarendon
+        { 1.00f, 0.90f, 1.00f, 0.20f, 0.f,   0.f,   0.f,   0.f }, // EarlyBird
+        { 1.05f, 1.00f, 1.00f, 0.00f, 0.f, -10.f,   0.f,   0.f }, // Gingham
+        { 1.20f, 0.90f, 1.10f, 0.00f, 0.f,   0.f,   0.f,   0.f }, // Hudson
+        { 1.10f, 1.10f, 1.00f, 0.30f, 1.f,   0.f,   0.f,   0.f }, // Inkwell
+        { 1.05f, 1.00f, 1.00f, 0.00f, 0.f,   0.f, -14.f,  16.f }, // Kelvin: overlay tint approximated as amber
+        { 1.00f, 0.90f, 1.00f, 0.00f, 0.f,   0.f,   0.f,   0.f }, // Lark
+        { 1.00f, 1.50f, 1.10f, 0.00f, 0.f,   0.f,   0.f,   0.f }, // Lofi
+        { 0.95f, 0.95f, 1.50f, 0.25f, 0.f,   0.f,   0.f,   0.f }, // Maven
+        { 1.00f, 1.10f, 1.10f, 0.00f, 0.f,   0.f,   0.f,   0.f }, // Mayfair
+        { 1.10f, 1.10f, 1.00f, 0.00f, 1.f,   0.f,   0.f,   0.f }, // Moon
+        { 1.00f, 1.00f, 1.00f, 0.00f, 0.f,   0.f,   0.f,   0.f }, // Perpetua
+        { 1.10f, 0.85f, 0.75f, 0.22f, 0.f,   0.f,   0.f,   0.f }, // Reyes
+        { 1.05f, 0.90f, 0.90f, 0.20f, 0.f,   0.f,   0.f,   0.f }, // Rise
+        { 1.05f, 1.00f, 0.66f, 0.00f, 0.f,   0.f,   0.f,   0.f }, // Slumber
+        { 1.15f, 0.75f, 0.85f, 0.00f, 0.f,   0.f,   0.f,   0.f }, // Stinson
+        { 0.90f, 1.50f, 1.00f, 0.00f, 0.f,   0.f,   0.f,   0.f }, // Toaster
+        { 1.08f, 1.08f, 1.00f, 0.08f, 0.f,   0.f,   0.f,   0.f }, // Valencia
+        { 1.10f, 1.00f, 1.60f, 0.30f, 0.f, -10.f,   0.f,   0.f }, // Walden
+        { 0.90f, 0.95f, 1.00f, 0.00f, 0.5f,  0.f,   0.f,   0.f }, // Willow
+        { 1.00f, 1.00f, 1.00f, 0.30f, 0.f,   0.f,   0.f,   0.f }, // Xpro
+    };
+    static_assert(FilterCount - Filter_1977 == (int)(sizeof(kPresets) / sizeof(kPresets[0])), "preset table must match FxFilter");
 }
 
 void BuildLuts(const FxSettings& s, uint8_t lutY[256], uint8_t lutU[256], uint8_t lutV[256])
@@ -67,6 +101,26 @@ void BuildLuts(const FxSettings& s, uint8_t lutY[256], uint8_t lutU[256], uint8_
     case FilterVivid: sat *= 1.35f; contrast *= 1.15f; break;
     case FilterSepia: sat = 0.f; du -= 10.f; dv += 12.f; break;
     case FilterFade:  sat *= 0.8f; lift = 0.08f; range = 0.84f; break;
+    }
+
+    if (s.filter >= Filter_1977 && s.filter < FilterCount)
+    {
+        const Preset& p = kPresets[s.filter - Filter_1977];
+        gain *= p.brightness;
+        contrast *= p.contrast;
+        // sepia() and grayscale() are partial desaturation with a warm tint, saturate() is a straight scale.
+        // grayscale() runs last, so a full grayscale (Inkwell, Moon) drops the sepia tint with the rest of the colour.
+        sat *= p.saturate * (1.f - 0.55f * p.sepia) * (1.f - p.grayscale);
+        du += p.du - 10.f * p.sepia * (1.f - p.grayscale);
+        dv += p.dv + 12.f * p.sepia * (1.f - p.grayscale);
+        if (p.hue != 0.f)
+        {
+            // A hue rotation turns each chroma vector, which a per-channel LUT can't express. Shift chroma the
+            // way the rotation moves a typical skin tone (U-128 = -18, V-128 = +22) instead.
+            const float a = p.hue * 3.14159265f / 180.f, c = std::cos(a), sn = std::sin(a);
+            du += c * -18.f - sn * 22.f + 18.f;
+            dv += sn * -18.f + c * 22.f - 22.f;
+        }
     }
 
     for (int i = 0; i < 256; i++)

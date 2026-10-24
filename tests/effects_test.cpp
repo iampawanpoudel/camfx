@@ -43,6 +43,24 @@ static void TestLuts()
     s = FxSettings(); s.warmth = 100;
     BuildLuts(s, ly, lu, lv);
     CHECK(lu[128] < 128 && lv[128] > 128); // warmer = less blue, more red
+
+    // Every preset must change something; Perpetua is empty in the source list, so it is the identity.
+    for (int f = Filter_1977; f < FilterCount; f++)
+    {
+        s = FxSettings(); s.filter = f;
+        BuildLuts(s, ly, lu, lv);
+        bool changed = false;
+        for (int i = 0; i < 256; i++) changed |= ly[i] != i || lu[i] != i || lv[i] != i;
+        CHECK(changed == (f != FilterPerpetua));
+    }
+
+    s = FxSettings(); s.filter = FilterInkwell; // full grayscale
+    BuildLuts(s, ly, lu, lv);
+    CHECK(lu[100] == 128 && lv[200] == 128 && ly[200] > 200);
+
+    s = FxSettings(); s.filter = FilterKelvin; // amber overlay tint: less blue, more red
+    BuildLuts(s, ly, lu, lv);
+    CHECK(lu[128] < 128 && lv[128] > 128);
 }
 
 static void TestZoomRect()

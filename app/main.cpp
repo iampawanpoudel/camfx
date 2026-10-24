@@ -37,6 +37,17 @@ namespace
     const UINT WM_TRAY = WM_APP + 1, WM_CALL = WM_APP + 2, WM_FRAME = WM_APP + 3, WM_STATUS = WM_APP + 4;
     const wchar_t kRunKey[] = L"Software\\Microsoft\\Windows\\CurrentVersion\\Run";
 
+    // Combo box order must match FxFilter: the selected index is saved as the filter value.
+    const wchar_t* const kFilterNames[] =
+    {
+        L"None", L"Mono", L"Warm", L"Cool", L"Vivid", L"Sepia", L"Fade",
+        L"1977", L"Aden", L"Amaro", L"Brannan", L"Clarendon", L"EarlyBird", L"Gingham",
+        L"Hudson", L"Inkwell", L"Kelvin", L"Lark", L"Lofi", L"Maven", L"Mayfair",
+        L"Moon", L"Perpetua", L"Reyes", L"Rise", L"Slumber", L"Stinson", L"Toaster",
+        L"Valencia", L"Walden", L"Willow", L"Xpro",
+    };
+    static_assert(ARRAYSIZE(kFilterNames) == (size_t)FilterCount, "filter names must match FxFilter");
+
     HINSTANCE g_inst;
     HWND g_dlg;
     UINT g_taskbarCreated;
@@ -491,8 +502,7 @@ namespace
             SendMessageW(hwnd, WM_SETICON, ICON_BIG, (LPARAM)big);
             SendMessageW(hwnd, WM_SETICON, ICON_SMALL, (LPARAM)big);
             for (auto s : { L"Off", L"Blur", L"Image" }) SendDlgItemMessageW(hwnd, IDC_BG, CB_ADDSTRING, 0, (LPARAM)s);
-            for (auto s : { L"None", L"Mono", L"Warm", L"Cool", L"Vivid", L"Sepia", L"Fade" })
-                SendDlgItemMessageW(hwnd, IDC_FILTER, CB_ADDSTRING, 0, (LPARAM)s);
+            for (auto s : kFilterNames) SendDlgItemMessageW(hwnd, IDC_FILTER, CB_ADDSTRING, 0, (LPARAM)s);
             LoadControls(LoadSettings());
             CheckDlgButton(hwnd, IDC_PREVIEW_ON, AppGet(L"preview", L"1") == L"1");
             CheckDlgButton(hwnd, IDC_POPUP, AppGet(L"popup", L"1") == L"1");

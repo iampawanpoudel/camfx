@@ -5,7 +5,17 @@
 #include <functional>
 #include <vector>
 
-enum FxFilter { FilterNone, FilterMono, FilterWarm, FilterCool, FilterVivid, FilterSepia, FilterFade, FilterCount };
+enum FxFilter
+{
+    FilterNone, FilterMono, FilterWarm, FilterCool, FilterVivid, FilterSepia, FilterFade,
+    // One-tap looks: each is a CSS-style filter chain approximated in BuildLuts (see its preset table).
+    // Appended after the originals so values already saved in settings.ini keep their meaning.
+    Filter_1977, FilterAden, FilterAmaro, FilterBrannan, FilterClarendon, FilterEarlyBird, FilterGingham,
+    FilterHudson, FilterInkwell, FilterKelvin, FilterLark, FilterLofi, FilterMaven, FilterMayfair,
+    FilterMoon, FilterPerpetua, FilterReyes, FilterRise, FilterSlumber, FilterStinson, FilterToaster,
+    FilterValencia, FilterWalden, FilterWillow, FilterXpro,
+    FilterCount
+};
 enum FxBackground { BgOff, BgBlur, BgImage };
 
 struct FxSettings

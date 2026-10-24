@@ -5,7 +5,7 @@ Lightweight camera effects for Windows 11, similar to the macOS video effects. C
 - **Zoom and pan**: crop in instead of showing the full wide view
 - **Auto-frame (follow me)**: keeps your head and shoulders centered as you move
 - **Background blur** (5 strengths) or **background image**, using a person-segmentation model with edge refinement
-- **Filters**: Mono, Warm, Cool, Vivid, Sepia, Fade
+- **Filters**: Mono, Warm, Cool, Vivid, Sepia, Fade, plus 25 one-tap looks (1977, Aden, Amaro, Brannan, Clarendon, EarlyBird, Gingham, Hudson, Inkwell, Kelvin, Lark, Lofi, Maven, Mayfair, Moon, Perpetua, Reyes, Rise, Slumber, Stinson, Toaster, Valencia, Walden, Willow, Xpro)
 - **Adjustments**: brightness, contrast, saturation, warmth, exposure, low-light boost
 - **Mirror**
 
@@ -179,7 +179,7 @@ $f = 'C:\ProgramData\CamFX\settings.ini'
 | `background` | 0 off, 1 blur, 2 image (`C:\ProgramData\CamFX\background.img`) |
 | `blur` | 1 (lightest) to 5 (strongest) |
 | `brightness`, `contrast`, `saturation`, `warmth`, `exposure` | -100 to 100 |
-| `filter` | 0 none, 1 mono, 2 warm, 3 cool, 4 vivid, 5 sepia, 6 fade |
+| `filter` | 0 none, 1 mono, 2 warm, 3 cool, 4 vivid, 5 sepia, 6 fade, 7 to 31 the one-tap looks in picker order (7 = 1977, ... 31 = xpro) |
 
 The `[App]` section belongs to CamFX.exe: the chosen webcam, preview and popup options.
 
