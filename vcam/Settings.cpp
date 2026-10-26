@@ -62,6 +62,7 @@ FxSettings LoadSettings()
     s.exposure = GetInt(p, L"exposure", s.exposure);
     s.filter = GetInt(p, L"filter", s.filter);
     s.lowLight = GetInt(p, L"lowLight", s.lowLight) != 0;
+    s.studioLight = GetInt(p, L"studioLight", s.studioLight) != 0;
     return s;
 }
 
@@ -82,6 +83,7 @@ void SaveSettings(const FxSettings& s)
     Put(p, L"exposure", s.exposure);
     Put(p, L"filter", s.filter);
     Put(p, L"lowLight", s.lowLight);
+    Put(p, L"studioLight", s.studioLight);
 }
 
 bool FileChanged(const std::wstring& path, FILETIME* stamp)

@@ -128,6 +128,33 @@ static void TestBackground()
     }
 }
 
+static void TestStudioLight()
+{
+    const int W = 64, H = 32;
+    FxSettings s;
+    s.studioLight = true;
+
+    // A solid person is lifted toward a flattering video-range white point.
+    Effects subject;
+    subject.SetSettings(s);
+    subject.SetSegmenter([](const float*, float* m) { for (int i = 0; i < Effects::kMaskW * Effects::kMaskH; i++) m[i] = 1.f; return true; });
+    Frame foreground(W, H, 100, 110, 150);
+    Frame foregroundOriginal = foreground;
+    foreground.Run(subject);
+    CHECK(foreground.y[W * 16 + 32] > foregroundOriginal.y[W * 16 + 32]);
+    CHECK(foreground.uv == foregroundOriginal.uv);
+
+    // A frame with no person becomes subtly darker, while chroma remains untouched.
+    Effects room;
+    room.SetSettings(s);
+    room.SetSegmenter([](const float*, float* m) { for (int i = 0; i < Effects::kMaskW * Effects::kMaskH; i++) m[i] = 0.f; return true; });
+    Frame background(W, H, 100, 110, 150);
+    Frame backgroundOriginal = background;
+    background.Run(room);
+    CHECK(background.y[W * 16 + 32] < backgroundOriginal.y[W * 16 + 32]);
+    CHECK(background.uv == backgroundOriginal.uv);
+}
+
 // argv[1]: folder with onnxruntime.dll and person_segmenter.onnx
 static void TestSegmenter(const wchar_t* dir)
 {
@@ -183,6 +210,7 @@ int wmain(int argc, wchar_t** argv)
     TestPassthrough();
     TestMirrorAndZoom();
     TestBackground();
+    TestStudioLight();
     if (argc > 1) TestSegmenter(argv[1]);
     else std::printf("skipping segmenter test (no model dir)\n");
     std::printf(g_fail ? "%d check(s) failed\n" : "all effects tests passed\n", g_fail);

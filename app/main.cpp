@@ -216,6 +216,7 @@ namespace
         CheckDlgButton(g_dlg, IDC_AUTOFRAME, s.autoFrame);
         CheckDlgButton(g_dlg, IDC_MIRROR, s.mirror);
         CheckDlgButton(g_dlg, IDC_LOWLIGHT, s.lowLight);
+        CheckDlgButton(g_dlg, IDC_STUDIOLIGHT, s.studioLight);
         SendDlgItemMessageW(g_dlg, IDC_BG, CB_SETCURSEL, s.background, 0);
         SendDlgItemMessageW(g_dlg, IDC_FILTER, CB_SETCURSEL, s.filter, 0);
         UpdateEnables();
@@ -236,6 +237,7 @@ namespace
         s.autoFrame = Checked(IDC_AUTOFRAME);
         s.mirror = Checked(IDC_MIRROR);
         s.lowLight = Checked(IDC_LOWLIGHT);
+        s.studioLight = Checked(IDC_STUDIOLIGHT);
         s.background = Combo(IDC_BG);
         s.filter = Combo(IDC_FILTER);
         return s;
@@ -564,6 +566,7 @@ namespace
             case IDC_AUTOFRAME:
             case IDC_MIRROR:
             case IDC_LOWLIGHT:
+            case IDC_STUDIOLIGHT:
                 OnChanged();
                 return TRUE;
             case IDC_BGIMAGE:

@@ -374,6 +374,26 @@ void Effects::Composite(uint8_t* y, int yPitch, uint8_t* uv, int uvPitch)
     }
 }
 
+// Apple-style Studio Light: use the already edge-refined person alpha to lift the
+// subject while gently taking exposure out of the room. Keeping this luma-only
+// avoids color shifts and costs one short pass over the Y plane.
+void Effects::ApplyStudioLight(uint8_t* y, int yPitch)
+{
+    for (int yy = 0; yy < m_h; yy++)
+    {
+        uint8_t* yr = y + (size_t)yy * yPitch;
+        const uint8_t* ar = &m_alpha[(size_t)yy * m_w];
+        for (int x = 0; x < m_w; x++)
+        {
+            float a = ar[x] * (1.f / 255.f);
+            float source = yr[x];
+            float room = source * 0.82f;
+            float subject = source + (235.f - source) * 0.16f;
+            yr[x] = Clamp8(Lerp(room, subject, a));
+        }
+    }
+}
+
 // Center Stage-style framing: keep head and shoulders in view, ease toward the target, ignore small moves.
 void Effects::UpdateAutoFrame()
 {
@@ -420,12 +440,13 @@ void Effects::Process(uint8_t* y, int yPitch, uint8_t* uv, int uvPitch, int w, i
     m_frame++;
 
     bool haveAlpha = false;
-    if ((m_s.background != BgOff || m_s.autoFrame) && UpdateMask(y, yPitch, uv, uvPitch))
+    if ((m_s.background != BgOff || m_s.autoFrame || m_s.studioLight) && UpdateMask(y, yPitch, uv, uvPitch))
     {
         BuildAlpha(y, yPitch);
         haveAlpha = true;
     }
     if (haveAlpha && m_s.background != BgOff) Composite(y, yPitch, uv, uvPitch);
+    if (haveAlpha && m_s.studioLight) ApplyStudioLight(y, yPitch);
 
     FxRect r = ZoomRect(w, h, m_s.zoom, m_s.panX, m_s.panY);
     if (m_s.autoFrame)

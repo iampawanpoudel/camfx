@@ -29,6 +29,7 @@
 #define IDC_LOOK_SECTION   1025
 #define IDC_SYSTEM_SECTION 1026
 #define IDC_CALL_HELP      1027
+#define IDC_STUDIOLIGHT    1028
 
 #define IDM_OPEN        2001
 #define IDM_EXIT        2002

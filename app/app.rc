@@ -47,7 +47,8 @@ BEGIN
     TB(IDC_WARMTH, 350, 188, 158)
     LTEXT           "Exposure", -1, 286, 210, 58, 10
     TB(IDC_EXPOSURE, 350, 208, 158)
-    AUTOCHECKBOX    "Low-light boost", IDC_LOWLIGHT, 354, 232, 105, 12
+    AUTOCHECKBOX    "Studio Light", IDC_STUDIOLIGHT, 286, 232, 78, 12
+    AUTOCHECKBOX    "Low-light boost", IDC_LOWLIGHT, 398, 232, 105, 12
     PUSHBUTTON      "Reset adjustments", IDC_RESET, 354, 251, 100, 16
 
     LTEXT           "SYSTEM", IDC_SYSTEM_SECTION, 286, 283, 120, 11

@@ -19,6 +19,7 @@ struct FxSettings
     int brightness = 0, contrast = 0, saturation = 0, warmth = 0, exposure = 0; // -100..100
     int filter = FilterNone;
     bool lowLight = false;
+    bool studioLight = false;
 };
 
 struct FxRect { float x, y, w, h; };
@@ -46,6 +47,7 @@ private:
     bool UpdateMask(const uint8_t* y, int yPitch, const uint8_t* uv, int uvPitch);
     void BuildAlpha(const uint8_t* y, int yPitch);
     void Composite(uint8_t* y, int yPitch, uint8_t* uv, int uvPitch);
+    void ApplyStudioLight(uint8_t* y, int yPitch);
     void UpdateAutoFrame();
     void FitBackgroundImage();
 

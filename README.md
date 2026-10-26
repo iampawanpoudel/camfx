@@ -6,7 +6,7 @@ Lightweight camera effects for Windows 11, similar to the macOS video effects. C
 - **Auto-frame (follow me)**: keeps your head and shoulders centered as you move
 - **Background blur** (5 strengths) or **background image**, using a person-segmentation model with edge refinement
 - **Filters**: Mono, Warm, Cool, Vivid, Sepia, Fade
-- **Adjustments**: brightness, contrast, saturation, warmth, exposure, low-light boost
+- **Adjustments**: brightness, contrast, saturation, warmth, exposure, low-light boost, Studio Light
 - **Mirror**
 
 It costs nothing when no app is using the camera. The effects only run while an app has CamFX Camera open, and then they use a few percent of one CPU core.
@@ -175,7 +175,7 @@ $f = 'C:\ProgramData\CamFX\settings.ini'
 |---|---|
 | `zoom` | 1 to 4 |
 | `panX`, `panY` | -1 to 1 |
-| `autoFrame`, `mirror`, `lowLight` | 0 or 1 |
+| `autoFrame`, `mirror`, `lowLight`, `studioLight` | 0 or 1 |
 | `background` | 0 off, 1 blur, 2 image (`C:\ProgramData\CamFX\background.img`) |
 | `blur` | 1 (lightest) to 5 (strongest) |
 | `brightness`, `contrast`, `saturation`, `warmth`, `exposure` | -100 to 100 |
