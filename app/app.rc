@@ -7,48 +7,51 @@ IDI_CAMFX ICON "camfx.ico"
 
 #define TB(id, x, y, w) CONTROL "", id, TRACKBAR_CLASS, TBS_HORZ | TBS_NOTICKS | TBS_TOOLTIPS | WS_TABSTOP, x, y, w, 14
 
-IDD_MAIN DIALOGEX 0, 0, 470, 262
+IDD_MAIN DIALOGEX 0, 0, 520, 350
 STYLE DS_SETFONT | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX
 CAPTION "CamFX"
-FONT 9, "Segoe UI", 400, 0, 0x1
+FONT 9, "Segoe UI Variable Text", 400, 0, 0x1
 BEGIN
-    LTEXT           "Camera", -1, 8, 10, 30, 10
-    COMBOBOX        IDC_CAMERA, 40, 8, 208, 120, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    CONTROL         "", IDC_PREVIEW, "Static", SS_OWNERDRAW, 8, 24, 240, 135
-    AUTOCHECKBOX    "Preview", IDC_PREVIEW_ON, 8, 163, 50, 10
-    LTEXT           "", IDC_STATUS, 62, 163, 186, 10
+    LTEXT           "CAMERA & PREVIEW", IDC_CAMERA_SECTION, 12, 12, 180, 11
+    LTEXT           "Camera", -1, 12, 31, 42, 10
+    COMBOBOX        IDC_CAMERA, 12, 42, 254, 120, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "", IDC_PREVIEW, "Static", SS_OWNERDRAW, 12, 69, 254, 143
+    AUTOCHECKBOX    "Preview", IDC_PREVIEW_ON, 12, 220, 55, 12
+    LTEXT           "", IDC_STATUS, 74, 221, 192, 12
 
-    LTEXT           "Zoom", -1, 8, 181, 34, 10
-    TB(IDC_ZOOM, 42, 179, 206)
-    LTEXT           "Pan X", -1, 8, 197, 34, 10
-    TB(IDC_PANX, 42, 195, 206)
-    LTEXT           "Pan Y", -1, 8, 213, 34, 10
-    TB(IDC_PANY, 42, 211, 206)
-    AUTOCHECKBOX    "Auto-frame (follow me)", IDC_AUTOFRAME, 8, 229, 110, 10
-    AUTOCHECKBOX    "Mirror", IDC_MIRROR, 130, 229, 60, 10
-    AUTOCHECKBOX    "Start with Windows", IDC_AUTOSTART, 8, 245, 90, 10
-    AUTOCHECKBOX    "Show this panel when a call starts", IDC_POPUP, 100, 245, 150, 10
+    LTEXT           "FRAMING", IDC_FRAME_SECTION, 12, 246, 120, 11
+    LTEXT           "Zoom", -1, 12, 265, 40, 10
+    TB(IDC_ZOOM, 57, 263, 209)
+    LTEXT           "Pan X", -1, 12, 285, 40, 10
+    TB(IDC_PANX, 57, 283, 209)
+    LTEXT           "Pan Y", -1, 12, 305, 40, 10
+    TB(IDC_PANY, 57, 303, 209)
+    AUTOCHECKBOX    "Auto-frame (follow me)", IDC_AUTOFRAME, 12, 326, 118, 12
+    AUTOCHECKBOX    "Mirror", IDC_MIRROR, 150, 326, 60, 12
 
-    LTEXT           "Background", -1, 262, 10, 50, 10
-    COMBOBOX        IDC_BG, 316, 8, 146, 80, CBS_DROPDOWNLIST | WS_TABSTOP
-    LTEXT           "Blur", -1, 262, 28, 50, 10
-    TB(IDC_BLUR, 312, 26, 150)
-    PUSHBUTTON      "Choose image...", IDC_BGIMAGE, 316, 44, 146, 14
+    LTEXT           "BACKGROUND & LOOK", IDC_LOOK_SECTION, 286, 12, 180, 11
+    LTEXT           "Background", -1, 286, 31, 58, 10
+    COMBOBOX        IDC_BG, 354, 28, 154, 80, CBS_DROPDOWNLIST | WS_TABSTOP
+    LTEXT           "Blur", -1, 286, 54, 58, 10
+    TB(IDC_BLUR, 350, 52, 158)
+    PUSHBUTTON      "Choose image...", IDC_BGIMAGE, 354, 72, 154, 16
+    LTEXT           "Filter", -1, 286, 105, 58, 10
+    COMBOBOX        IDC_FILTER, 354, 102, 154, 120, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Brightness", -1, 286, 130, 58, 10
+    TB(IDC_BRIGHTNESS, 350, 128, 158)
+    LTEXT           "Contrast", -1, 286, 150, 58, 10
+    TB(IDC_CONTRAST, 350, 148, 158)
+    LTEXT           "Saturation", -1, 286, 170, 58, 10
+    TB(IDC_SATURATION, 350, 168, 158)
+    LTEXT           "Warmth", -1, 286, 190, 58, 10
+    TB(IDC_WARMTH, 350, 188, 158)
+    LTEXT           "Exposure", -1, 286, 210, 58, 10
+    TB(IDC_EXPOSURE, 350, 208, 158)
+    AUTOCHECKBOX    "Low-light boost", IDC_LOWLIGHT, 354, 232, 105, 12
+    PUSHBUTTON      "Reset adjustments", IDC_RESET, 354, 251, 100, 16
 
-    LTEXT           "Filter", -1, 262, 70, 50, 10
-    COMBOBOX        IDC_FILTER, 316, 68, 146, 120, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Brightness", -1, 262, 90, 50, 10
-    TB(IDC_BRIGHTNESS, 312, 88, 150)
-    LTEXT           "Contrast", -1, 262, 108, 50, 10
-    TB(IDC_CONTRAST, 312, 106, 150)
-    LTEXT           "Saturation", -1, 262, 126, 50, 10
-    TB(IDC_SATURATION, 312, 124, 150)
-    LTEXT           "Warmth", -1, 262, 144, 50, 10
-    TB(IDC_WARMTH, 312, 142, 150)
-    LTEXT           "Exposure", -1, 262, 162, 50, 10
-    TB(IDC_EXPOSURE, 312, 160, 150)
-    AUTOCHECKBOX    "Low-light boost", IDC_LOWLIGHT, 316, 180, 100, 10
-    PUSHBUTTON      "Reset all", IDC_RESET, 316, 198, 70, 14
-
-    LTEXT           "In your call app, pick ""CamFX Camera"" as the camera.", -1, 262, 230, 200, 20
+    LTEXT           "SYSTEM", IDC_SYSTEM_SECTION, 286, 283, 120, 11
+    AUTOCHECKBOX    "Start with Windows", IDC_AUTOSTART, 286, 302, 105, 12
+    AUTOCHECKBOX    "Show panel when a call starts", IDC_POPUP, 286, 320, 150, 12
+    LTEXT           "Choose CamFX Camera in your call app.", IDC_CALL_HELP, 286, 338, 220, 10
 END

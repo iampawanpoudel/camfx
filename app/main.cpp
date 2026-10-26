@@ -6,6 +6,7 @@
 #include <commdlg.h>
 #include <shellapi.h>
 #include <sddl.h>
+#include <uxtheme.h>
 #include <mfapi.h>
 #include <mfidl.h>
 #include <mfreadwrite.h>
@@ -31,6 +32,7 @@
 #pragma comment(lib, "comctl32")
 #pragma comment(lib, "comdlg32")
 #pragma comment(lib, "advapi32")
+#pragma comment(lib, "uxtheme")
 
 namespace
 {
@@ -39,6 +41,8 @@ namespace
 
     HINSTANCE g_inst;
     HWND g_dlg;
+    HFONT g_sectionFont = nullptr;
+    HBRUSH g_windowBrush = nullptr;
     UINT g_taskbarCreated;
     NOTIFYICONDATAW g_nid = {};
     wil::com_ptr_nothrow<IMFVirtualCamera> g_vcam;
@@ -65,6 +69,23 @@ namespace
     }
 
     void SetStatus(const std::wstring& s) { SetDlgItemTextW(g_dlg, IDC_STATUS, s.c_str()); }
+
+    void ApplyModernTheme(HWND hwnd)
+    {
+        // Native controls keep the panel fast: no compositor, web view, or per-frame UI work.
+        g_windowBrush = CreateSolidBrush(RGB(248, 250, 252));
+        LOGFONTW lf = {};
+        HDC dc = GetDC(hwnd);
+        lf.lfHeight = -MulDiv(9, GetDeviceCaps(dc, LOGPIXELSY), 72);
+        ReleaseDC(hwnd, dc);
+        lf.lfWeight = FW_SEMIBOLD;
+        wcscpy_s(lf.lfFaceName, L"Segoe UI Variable Text");
+        g_sectionFont = CreateFontIndirectW(&lf);
+        for (int id : { IDC_CAMERA_SECTION, IDC_FRAME_SECTION, IDC_LOOK_SECTION, IDC_SYSTEM_SECTION })
+            SendDlgItemMessageW(hwnd, id, WM_SETFONT, (WPARAM)g_sectionFont, TRUE);
+        for (int id : { IDC_CAMERA, IDC_BG, IDC_FILTER, IDC_BGIMAGE, IDC_RESET })
+            SetWindowTheme(GetDlgItem(hwnd, id), L"Explorer", nullptr);
+    }
 
     // Windows lists it as "CamFX Camera (Windows Virtual Camera)".
     bool IsCamFx(const std::wstring& name) { return name.rfind(VIRTUALCAMERAMEDIASOURCE_FRIENDLYNAME, 0) == 0; }
@@ -487,6 +508,7 @@ namespace
         case WM_INITDIALOG:
         {
             g_dlg = hwnd;
+            ApplyModernTheme(hwnd);
             HICON big = LoadIconW(g_inst, MAKEINTRESOURCEW(IDI_CAMFX));
             SendMessageW(hwnd, WM_SETICON, ICON_BIG, (LPARAM)big);
             SendMessageW(hwnd, WM_SETICON, ICON_SMALL, (LPARAM)big);
@@ -499,6 +521,21 @@ namespace
             CheckDlgButton(hwnd, IDC_AUTOSTART, AutoStartEnabled());
             SetupCameras();
             return TRUE;
+        }
+        case WM_CTLCOLORDLG:
+            return (INT_PTR)g_windowBrush;
+        case WM_CTLCOLORSTATIC:
+        {
+            HDC dc = (HDC)wp;
+            int id = GetDlgCtrlID((HWND)lp);
+            SetBkMode(dc, TRANSPARENT);
+            if (id == IDC_CAMERA_SECTION || id == IDC_FRAME_SECTION || id == IDC_LOOK_SECTION || id == IDC_SYSTEM_SECTION)
+                SetTextColor(dc, RGB(37, 99, 235));
+            else if (id == IDC_STATUS || id == IDC_CALL_HELP)
+                SetTextColor(dc, RGB(71, 85, 105));
+            else
+                SetTextColor(dc, RGB(15, 23, 42));
+            return (INT_PTR)g_windowBrush;
         }
         case WM_HSCROLL:
             OnChanged();
@@ -576,6 +613,11 @@ namespace
         case WM_CLOSE:
             HideMain();
             return TRUE;
+        case WM_NCDESTROY:
+            if (g_sectionFont) { DeleteObject(g_sectionFont); g_sectionFont = nullptr; }
+            if (g_windowBrush) { DeleteObject(g_windowBrush); g_windowBrush = nullptr; }
+            g_dlg = nullptr;
+            break;
         }
         return FALSE;
     }

@@ -24,6 +24,11 @@
 #define IDC_AUTOSTART   1020
 #define IDC_POPUP       1021
 #define IDC_STATUS      1022
+#define IDC_CAMERA_SECTION 1023
+#define IDC_FRAME_SECTION  1024
+#define IDC_LOOK_SECTION   1025
+#define IDC_SYSTEM_SECTION 1026
+#define IDC_CALL_HELP      1027
 
 #define IDM_OPEN        2001
 #define IDM_EXIT        2002
